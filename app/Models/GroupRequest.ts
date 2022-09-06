@@ -1,7 +1,8 @@
-import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import User from './User'
+import { DateTime } from 'luxon'
+
 import Group from './Group'
+import User from './User'
 
 export default class GroupRequest extends BaseModel {
   public static table = 'groups_requests'
@@ -13,7 +14,7 @@ export default class GroupRequest extends BaseModel {
   public userId: number
 
   @belongsTo(() => User, {
-    foreignKey: 'user_id',
+    foreignKey: 'userId',
   })
   public user: BelongsTo<typeof User>
 
@@ -21,7 +22,7 @@ export default class GroupRequest extends BaseModel {
   public groupId: number
 
   @belongsTo(() => Group, {
-    foreignKey: 'group_id',
+    foreignKey: 'groupId',
   })
   public group: BelongsTo<typeof Group>
 
