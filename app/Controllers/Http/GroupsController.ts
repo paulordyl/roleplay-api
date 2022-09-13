@@ -4,6 +4,13 @@ import Group from 'App/Models/Group'
 import CreateGroup from 'App/Validators/CreateGroupValidator'
 
 export default class GroupsController {
+  public async index({ request, response }: HttpContextContract) {
+    const { text, ['user']: userId } = request.qs()
+
+    const groups = await this.filterByQueryString(userId, text)
+    return response.ok({ groups })
+  }
+
   public async store({ request, response }: HttpContextContract) {
     const groupPayload = await request.validate(CreateGroup)
     const group = await Group.create(groupPayload)
@@ -47,5 +54,38 @@ export default class GroupsController {
     await group.delete()
     // await group.related('players').detach()
     return response.ok({})
+  }
+
+  private filterByQueryString(userId: number, text: string) {
+    if (userId && text) return this.filterByUserAndText(userId, text)
+    else if (userId) return this.filterByUser(userId)
+    else if (text) return this.filterByText(text)
+    else return this.all()
+  }
+
+  private all() {
+    return Group.query().preload('players').preload('masterUser')
+  }
+
+  private filterByUser(userId: number) {
+    return Group.query()
+      .preload('players')
+      .preload('masterUser')
+      .withScopes((scope) => scope.withPlayer(userId))
+  }
+
+  private filterByText(text: string) {
+    return Group.query()
+      .preload('players')
+      .preload('masterUser')
+      .withScopes((scope) => scope.withText(text))
+  }
+
+  private filterByUserAndText(userId: number, text: string) {
+    return Group.query()
+      .preload('players')
+      .preload('masterUser')
+      .withScopes((scope) => scope.withPlayer(userId))
+      .withScopes((scope) => scope.withText(text))
   }
 }
